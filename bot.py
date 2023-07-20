@@ -7,6 +7,7 @@ reddit accounts and automatically obtains and refreshed access tokens.
 
 Authors:
 - /u/tr4ce
+- /u/Typhome - modified Python code for Estonia
 2023 Version:
 - https://github.com/Yantrun
 
@@ -52,7 +53,6 @@ import aiohttp
 import matplotlib
 import matplotlib.pyplot as plt
 from rich.logging import RichHandler
-import telegram
 
 __version__ = '3'
 
@@ -66,8 +66,8 @@ REDDIT_PLACE_SET_PIXEL_URL = "https://gql-realtime-2.reddit.com/query"
 PLACE_WEBSOCKET = "wss://gql-realtime-2.reddit.com/query"
 BACKEND_DOMAIN = os.getenv("PANEL")
 if BACKEND_DOMAIN is None:
-    BACKEND_DOMAIN = "r-placeczechbot.onrender.com"
-CNC_WEBSOCKET = f"wss://{BACKEND_DOMAIN}/api/ws"
+    BACKEND_DOMAIN = "staatus.eu/r-place-eesti"
+CNC_WEBSOCKET = f"wss://{BACKEND_DOMAIN}/ws"
 BACKEND_MAPS_URL = f"https://{BACKEND_DOMAIN}/maps"
 
 DEFAULT_USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:98.0) Gecko/20100101 Firefox/98.0"
@@ -177,7 +177,7 @@ class CNCOrderClient:
     def __init__(self, session):
         self.session = session
         self.ws = None
-        self.logger = logging.getLogger('PlaceCZ.cnc')
+        self.logger = logging.getLogger('PlaceEE.cnc')
 
     async def __aenter__(self):
         self.logger.info("Connecting to Command & Control server...")
@@ -216,7 +216,7 @@ class CNCOrderClient:
             return
 
         await self.ws.send_str(json.dumps({"type": "getmap"}))
-        await self.ws.send_str(json.dumps({"type": "brand", "brand": f"PlaceCZpythonV{__version__}"}))
+        await self.ws.send_str(json.dumps({"type": "brand", "brand": f"PlaceEEpythonV{__version__}"}))
 
         async for msg in self.ws:
             try:
@@ -282,7 +282,7 @@ class RedditPlaceClient:
         self.access_token_expire = None
         self.current_canvas = None
 
-        self.logger = logging.getLogger(f'PlaceCZ.reddit.{username}')
+        self.logger = logging.getLogger(f'PlaceEE.reddit.{username}')
         self.debug = debug
 
     async def __aenter__(self) -> RedditPlaceClient:
@@ -291,14 +291,12 @@ class RedditPlaceClient:
 
         if not success:
             msg = "%s - Reddit login was unsuccessful!" % self.username
-            #bot.send_message(text=msg, chat_id=TELEGRAM_CHAT)
             raise Exception("Reddit login was unsuccessful!")
 
         result = await self.scrape_access_token()
 
         if not result:
             msg = "%s - Could not obtain access token." % self.username
-            #bot.send_message(text=msg, chat_id=TELEGRAM_CHAT)
             raise Exception("Could not obtain access token.")
 
         self.access_token, expires_in = result
@@ -520,7 +518,6 @@ class RedditPlaceClient:
                                  self.current_canvas.shape, self.current_canvas.dtype)
         except aiohttp.ClientError:
             msg = "%s - Could not obtain current canvas!" % self.username
-            #bot.send_message(text=msg, chat_id=TELEGRAM_CHAT)
             logger.exception("Could not obtain current canvas!")
 
     def get_pixels_to_update(self, order_map) -> list:
@@ -635,7 +632,6 @@ class RedditPlaceClient:
                                 self.logger.error("Next available possibility: %s (%d seconds)",
                                                   next_dt, delta.total_seconds())
                                 msg = "Shadowban (%d seconds) - %s" % (delta.total_seconds(),self.username)
-                                #bot.send_message(text=msg, chat_id=TELEGRAM_CHAT)
 
                             return False, delta.total_seconds() + random.randint(5, 60)
                         else:
@@ -651,7 +647,6 @@ class RedditPlaceClient:
                         return True, delta.total_seconds() + random.randint(5, 60)
                 except Exception as e:
                     msg = "%s - Error placing pixel! Could not read response." % self.username
-                    #bot.send_message(text=msg, chat_id=TELEGRAM_CHAT)
                     self.logger.exception("Error placing pixel! Could not read response.")
                     return False, 60.0
 
@@ -689,7 +684,6 @@ class MainRunner:
                         await asyncio.gather(*tasks)
             except Exception:
                 msg = "%s - Error with C&C updater task..., trying again in 30 seconds." % self.username
-                #bot.send_message(text=msg, chat_id=TELEGRAM_CHAT)
                 logger.exception("Error with C&C updater task..., trying again in 30 seconds.")
             else:
                 logger.warning("Lost connection to C&C server, trying again in 30 seconds...")
