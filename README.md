@@ -1,3 +1,5 @@
+**This bot currently draws based this map: https://staatus.eu/r-place-eesti/maps/21-07-2023-03-23.png**
+
 Rename file `users.toml.example` to `users.toml`.
 
 Add Reddit accounts details (username/password) to file `users.toml`.
