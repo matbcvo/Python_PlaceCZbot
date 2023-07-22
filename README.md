@@ -6,7 +6,7 @@ Download Python installer from https://www.python.org/downloads/
 
 Install Python
 
-Add Reddit accounts details (username/password) to file `users.toml`.
+Add Reddit accounts details (username/password) to file `users.toml`. If you have only one Reddit account, then remove username2, username3 etc.
 
 Run Python script with command `python bot.py -c users.toml`.
 
