@@ -1,6 +1,6 @@
 # r/place 2023 bot for r/Eesti & r/BalticStates
 
-**This bot currently draws based on this map: https://staatus.eu/r-place-eesti/maps/21-07-2023-03-23.png**
+**This bot currently draws based on this map: https://staatus.eu/r-place-eesti/maps/23-07-2023-03-04.png**
 
 Download Python installer from https://www.python.org/downloads/
 
